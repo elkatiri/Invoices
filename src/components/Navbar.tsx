@@ -2,12 +2,15 @@
 
 import { Menu, LogOut } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
+import LanguageSwitcher from './LanguageSwitcher';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
+import { useI18n } from '@/lib/i18n/context';
 
 export default function Navbar({ onMenuClick }: { onMenuClick: () => void }) {
   const router = useRouter();
   const supabase = createClient();
+  const { t } = useI18n();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -26,13 +29,14 @@ export default function Navbar({ onMenuClick }: { onMenuClick: () => void }) {
       <div className="flex-1" />
 
       <div className="flex items-center gap-2">
+        <LanguageSwitcher variant="compact" />
         <ThemeToggle />
         <button
           onClick={handleLogout}
           className="flex items-center gap-2 px-3 py-2 text-sm text-dark-700 dark:text-light-300 hover:bg-light-100 dark:hover:bg-dark-700 rounded-lg transition-colors"
         >
           <LogOut size={16} />
-          <span className="hidden sm:inline">Logout</span>
+          <span className="hidden sm:inline">{t.navbar.logout}</span>
         </button>
       </div>
     </header>

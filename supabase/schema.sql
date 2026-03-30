@@ -92,6 +92,8 @@ create table public.invoices (
   status invoice_status default 'draft' not null,
   currency text default 'USD' not null,
   notes text,
+  tax_rate numeric(5,2) default 0 not null,
+  discount numeric(12,2) default 0 not null,
   issued_date date default current_date not null,
   due_date date,
   is_public boolean default true not null,
@@ -174,13 +176,29 @@ returns trigger
 language plpgsql
 security definer set search_path = ''
 as $$
+declare
+  subtotal numeric(12,2);
+  inv_tax_rate numeric(5,2);
+  inv_discount numeric(12,2);
+  final_total numeric(12,2);
 begin
-  update public.invoices
-  set total = coalesce(
-    (select sum(quantity * price) from public.invoice_items where invoice_id = coalesce(new.invoice_id, old.invoice_id)),
-    0
-  )
+  select coalesce(sum(quantity * price), 0)
+  into subtotal
+  from public.invoice_items
+  where invoice_id = coalesce(new.invoice_id, old.invoice_id);
+
+  select coalesce(tax_rate, 0), coalesce(discount, 0)
+  into inv_tax_rate, inv_discount
+  from public.invoices
   where id = coalesce(new.invoice_id, old.invoice_id);
+
+  final_total := (subtotal - inv_discount) * (1 + inv_tax_rate / 100);
+  if final_total < 0 then final_total := 0; end if;
+
+  update public.invoices
+  set total = final_total
+  where id = coalesce(new.invoice_id, old.invoice_id);
+
   return coalesce(new, old);
 end;
 $$;

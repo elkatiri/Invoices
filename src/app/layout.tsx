@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { I18nProvider } from "@/lib/i18n/context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,12 +46,21 @@ export default function RootLayout({
                 if (t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                   document.documentElement.classList.add('dark');
                 }
+                const l = localStorage.getItem('locale');
+                if (l === 'ar') {
+                  document.documentElement.lang = 'ar';
+                  document.documentElement.dir = 'rtl';
+                } else if (l === 'fr') {
+                  document.documentElement.lang = 'fr';
+                }
               } catch(e) {}
             `,
           }}
         />
       </head>
-      <body className="min-h-full flex flex-col" suppressHydrationWarning>{children}</body>
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>
+        <I18nProvider>{children}</I18nProvider>
+      </body>
     </html>
   );
 }

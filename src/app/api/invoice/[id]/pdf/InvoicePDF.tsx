@@ -302,15 +302,51 @@ export default function InvoicePDF({
             </View>
           ))}
 
-          <View style={styles.totalRow}>
-            <Text style={styles.totalLabel}>Total</Text>
-            <Text style={styles.totalValue}>
-              {sym}
-              {Number(invoice.total).toLocaleString('en-US', {
-                minimumFractionDigits: 2,
-              })}
-            </Text>
-          </View>
+          {(() => {
+            const subtotal = items.reduce(
+              (sum, item) => sum + Number(item.quantity) * Number(item.price),
+              0
+            );
+            const discountVal = Number(invoice.discount) || 0;
+            const taxRateVal = Number(invoice.tax_rate) || 0;
+            const afterDiscount = Math.max(subtotal - discountVal, 0);
+            const taxAmount = afterDiscount * (taxRateVal / 100);
+            return (
+              <View style={{ marginTop: 16, borderTopWidth: 2, borderTopColor: '#e5e5e5', paddingTop: 12 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 4 }}>
+                  <Text style={{ fontSize: 10, color: '#666', marginRight: 20, width: 80, textAlign: 'right' }}>Subtotal</Text>
+                  <Text style={{ fontSize: 10, color: '#444', width: 80, textAlign: 'right' }}>
+                    {sym}{subtotal.toFixed(2)}
+                  </Text>
+                </View>
+                {discountVal > 0 && (
+                  <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 4 }}>
+                    <Text style={{ fontSize: 10, color: '#666', marginRight: 20, width: 80, textAlign: 'right' }}>Discount</Text>
+                    <Text style={{ fontSize: 10, color: '#dc2626', width: 80, textAlign: 'right' }}>
+                      -{sym}{discountVal.toFixed(2)}
+                    </Text>
+                  </View>
+                )}
+                {taxRateVal > 0 && (
+                  <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 4 }}>
+                    <Text style={{ fontSize: 10, color: '#666', marginRight: 20, width: 80, textAlign: 'right' }}>Tax ({taxRateVal}%)</Text>
+                    <Text style={{ fontSize: 10, color: '#444', width: 80, textAlign: 'right' }}>
+                      {sym}{taxAmount.toFixed(2)}
+                    </Text>
+                  </View>
+                )}
+                <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: '#e5e5e5' }}>
+                  <Text style={styles.totalLabel}>Total</Text>
+                  <Text style={styles.totalValue}>
+                    {sym}
+                    {Number(invoice.total).toLocaleString('en-US', {
+                      minimumFractionDigits: 2,
+                    })}
+                  </Text>
+                </View>
+              </View>
+            );
+          })()}
         </View>
 
         {/* Notes */}

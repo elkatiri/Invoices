@@ -1,16 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
-import { Plus, Users, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Users, Pencil, Trash2, Search } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import EmptyState from '@/components/ui/EmptyState';
 import Modal from '@/components/ui/Modal';
 import ClientForm from './ClientForm';
 import type { Client } from '@/lib/types';
+import { useI18n } from '@/lib/i18n/context';
 
 export default function ClientsPageClient({
   initialClients,
@@ -18,27 +19,44 @@ export default function ClientsPageClient({
   initialClients: Client[];
 }) {
   const [clients, setClients] = useState(initialClients);
+  const [search, setSearch] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Client | null>(null);
   const router = useRouter();
   const supabase = createClient();
+  const { t } = useI18n();
+
+  const filtered = useMemo(() => {
+    if (!search.trim()) return clients;
+    const q = search.toLowerCase();
+    return clients.filter(
+      (c) =>
+        c.name.toLowerCase().includes(q) ||
+        c.email?.toLowerCase().includes(q) ||
+        c.phone?.toLowerCase().includes(q)
+    );
+  }, [clients, search]);
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Delete this client? This cannot be undone.')) return;
+    if (!confirm(t.clients.deleteConfirm)) return;
 
     const { error } = await supabase.from('clients').delete().eq('id', id);
     if (error) {
-      toast.error('Failed to delete client');
+      toast.error(t.clients.deleteFailed);
       return;
     }
     setClients((prev) => prev.filter((c) => c.id !== id));
-    toast.success('Client deleted');
+    toast.success(t.clients.deleteSuccess);
   };
 
-  const handleSaved = () => {
+  const handleSaved = (saved: Client) => {
+    if (editing) {
+      setClients((prev) => prev.map((c) => (c.id === saved.id ? saved : c)));
+    } else {
+      setClients((prev) => [saved, ...prev]);
+    }
     setModalOpen(false);
     setEditing(null);
-    router.refresh();
   };
 
   return (
@@ -46,30 +64,52 @@ export default function ClientsPageClient({
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-dark-800 dark:text-light-50">
-            Clients
+            {t.clients.title}
           </h1>
           <p className="text-sm text-dark-700 dark:text-light-300 mt-1">
-            Manage your client list
+            {t.clients.subtitle}
           </p>
         </div>
         <Button onClick={() => { setEditing(null); setModalOpen(true); }}>
           <Plus size={16} />
-          Add Client
+          {t.clients.addClient}
         </Button>
       </div>
+
+      {/* Search */}
+      {clients.length > 0 && (
+        <div className="relative">
+          <Search size={16} className="absolute start-3 top-1/2 -translate-y-1/2 text-light-300 dark:text-dark-700" />
+          <input
+            type="text"
+            placeholder={t.clients.searchPlaceholder}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full sm:max-w-sm ps-9 pe-3 py-2 rounded-lg border border-light-200 dark:border-dark-700 bg-white dark:bg-dark-900 text-dark-800 dark:text-light-50 placeholder-light-300 dark:placeholder-dark-700 focus:outline-none focus:ring-2 focus:ring-orange-brand/50 focus:border-orange-brand transition-colors text-sm"
+          />
+        </div>
+      )}
 
       {clients.length === 0 ? (
         <Card>
           <EmptyState
             icon={<Users size={48} />}
-            title="No clients yet"
-            description="Add your first client to start creating invoices."
+            title={t.clients.noClientsTitle}
+            description={t.clients.noClientsDesc}
             action={
               <Button onClick={() => setModalOpen(true)}>
                 <Plus size={16} />
-                Add Client
+                {t.clients.addClient}
               </Button>
             }
+          />
+        </Card>
+      ) : filtered.length === 0 ? (
+        <Card>
+          <EmptyState
+            icon={<Search size={48} />}
+            title={t.clients.noMatchesTitle}
+            description={t.clients.noMatchesDesc}
           />
         </Card>
       ) : (
@@ -78,22 +118,22 @@ export default function ClientsPageClient({
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-light-200 dark:border-dark-700 bg-light-50 dark:bg-dark-900/50">
-                  <th className="text-left py-3 px-4 font-medium text-dark-700 dark:text-light-300">
-                    Name
+                  <th className="text-start py-3 px-4 font-medium text-dark-700 dark:text-light-300">
+                    {t.clients.name}
                   </th>
-                  <th className="text-left py-3 px-4 font-medium text-dark-700 dark:text-light-300 hidden sm:table-cell">
-                    Email
+                  <th className="text-start py-3 px-4 font-medium text-dark-700 dark:text-light-300 hidden sm:table-cell">
+                    {t.clients.email}
                   </th>
-                  <th className="text-left py-3 px-4 font-medium text-dark-700 dark:text-light-300 hidden md:table-cell">
-                    Phone
+                  <th className="text-start py-3 px-4 font-medium text-dark-700 dark:text-light-300 hidden md:table-cell">
+                    {t.clients.phone}
                   </th>
-                  <th className="text-right py-3 px-4 font-medium text-dark-700 dark:text-light-300">
-                    Actions
+                  <th className="text-end py-3 px-4 font-medium text-dark-700 dark:text-light-300">
+                    {t.common.actions}
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-light-200 dark:divide-dark-700">
-                {clients.map((client) => (
+                {filtered.map((client) => (
                   <tr
                     key={client.id}
                     className="hover:bg-light-50 dark:hover:bg-dark-700/30 transition-colors"
@@ -143,7 +183,7 @@ export default function ClientsPageClient({
           setModalOpen(false);
           setEditing(null);
         }}
-        title={editing ? 'Edit Client' : 'Add Client'}
+        title={editing ? t.clients.editClient : t.clients.addClient}
       >
         <ClientForm client={editing} onSaved={handleSaved} />
       </Modal>

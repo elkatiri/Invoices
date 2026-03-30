@@ -9,13 +9,7 @@ import {
   UserCircle,
   X,
 } from 'lucide-react';
-
-const links = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/dashboard/clients', label: 'Clients', icon: Users },
-  { href: '/dashboard/invoices', label: 'Invoices', icon: FileText },
-  { href: '/dashboard/profile', label: 'Profile', icon: UserCircle },
-];
+import { useI18n } from '@/lib/i18n/context';
 
 export default function Sidebar({
   open,
@@ -25,6 +19,14 @@ export default function Sidebar({
   onClose: () => void;
 }) {
   const pathname = usePathname();
+  const { t } = useI18n();
+
+  const links = [
+    { href: '/dashboard', label: t.sidebar.dashboard, icon: LayoutDashboard },
+    { href: '/dashboard/clients', label: t.sidebar.clients, icon: Users },
+    { href: '/dashboard/invoices', label: t.sidebar.invoices, icon: FileText },
+    { href: '/dashboard/profile', label: t.sidebar.profile, icon: UserCircle },
+  ];
 
   return (
     <>
@@ -37,8 +39,8 @@ export default function Sidebar({
       )}
 
       <aside
-        className={`fixed top-0 left-0 z-50 h-full w-64 bg-white dark:bg-dark-800 border-r border-light-200 dark:border-dark-700 transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:z-auto ${
-          open ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed top-0 start-0 z-50 h-full w-64 bg-white dark:bg-dark-800 border-e border-light-200 dark:border-dark-700 transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:z-auto ${
+          open ? 'translate-x-0' : 'ltr:-translate-x-full rtl:translate-x-full'
         }`}
       >
         {/* Logo */}
@@ -46,7 +48,7 @@ export default function Sidebar({
           <Link href="/dashboard" className="flex items-center gap-2">
             <FileText className="text-orange-brand" size={24} />
             <span className="text-xl font-bold text-dark-800 dark:text-light-50">
-              InVoices
+              {t.common.appName}
             </span>
           </Link>
           <button onClick={onClose} className="lg:hidden text-dark-700 dark:text-light-300">

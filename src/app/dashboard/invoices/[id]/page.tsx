@@ -14,7 +14,7 @@ export default async function InvoiceDetailPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [{ data: invoice }, { data: items }, { data: clients }] =
+  const [{ data: invoice }, { data: items }, { data: clients }, { data: profile }] =
     await Promise.all([
       supabase
         .from('invoices')
@@ -33,6 +33,11 @@ export default async function InvoiceDetailPage({
         .select('*')
         .eq('user_id', user!.id)
         .order('name'),
+      supabase
+        .from('profiles')
+        .select('logo_url')
+        .eq('id', user!.id)
+        .single(),
     ]);
 
   if (!invoice) notFound();
@@ -48,6 +53,7 @@ export default async function InvoiceDetailPage({
       nextInvoiceNumber={numberData ?? invoice.invoice_number}
       invoice={invoice as Invoice}
       existingItems={(items as InvoiceItem[]) ?? []}
+      logoUrl={profile?.logo_url ?? null}
     />
   );
 }

@@ -113,11 +113,10 @@ export default async function PublicInvoicePage({
             <div className="flex flex-col sm:flex-row justify-between gap-6">
               <div>
                 {prof?.logo_url && (
-                  <Image
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
                     src={prof.logo_url}
                     alt="Logo"
-                    width={120}
-                    height={60}
                     className="h-12 w-auto object-contain mb-4"
                   />
                 )}
@@ -246,17 +245,59 @@ export default async function PublicInvoicePage({
                 ))}
               </tbody>
               <tfoot>
-                <tr className="border-t-2 border-gray-200">
-                  <td colSpan={3} className="py-4 text-right font-semibold text-gray-700">
-                    Total
-                  </td>
-                  <td className="py-4 text-right text-xl font-bold text-gray-900">
-                    {sym}
-                    {Number(inv.total).toLocaleString('en-US', {
-                      minimumFractionDigits: 2,
-                    })}
-                  </td>
-                </tr>
+                {(() => {
+                  const subtotal = lineItems.reduce(
+                    (sum, item) => sum + Number(item.quantity) * Number(item.price),
+                    0
+                  );
+                  const discountVal = Number(inv.discount) || 0;
+                  const taxRateVal = Number(inv.tax_rate) || 0;
+                  const afterDiscount = Math.max(subtotal - discountVal, 0);
+                  const taxAmount = afterDiscount * (taxRateVal / 100);
+                  return (
+                    <>
+                      <tr className="border-t border-gray-200">
+                        <td colSpan={3} className="py-2 text-right text-sm text-gray-500">
+                          Subtotal
+                        </td>
+                        <td className="py-2 text-right text-sm font-medium text-gray-700">
+                          {sym}{subtotal.toFixed(2)}
+                        </td>
+                      </tr>
+                      {discountVal > 0 && (
+                        <tr>
+                          <td colSpan={3} className="py-1 text-right text-sm text-gray-500">
+                            Discount
+                          </td>
+                          <td className="py-1 text-right text-sm font-medium text-red-600">
+                            -{sym}{discountVal.toFixed(2)}
+                          </td>
+                        </tr>
+                      )}
+                      {taxRateVal > 0 && (
+                        <tr>
+                          <td colSpan={3} className="py-1 text-right text-sm text-gray-500">
+                            Tax ({taxRateVal}%)
+                          </td>
+                          <td className="py-1 text-right text-sm font-medium text-gray-700">
+                            {sym}{taxAmount.toFixed(2)}
+                          </td>
+                        </tr>
+                      )}
+                      <tr className="border-t-2 border-gray-200">
+                        <td colSpan={3} className="py-4 text-right font-semibold text-gray-700">
+                          Total
+                        </td>
+                        <td className="py-4 text-right text-xl font-bold text-gray-900">
+                          {sym}
+                          {Number(inv.total).toLocaleString('en-US', {
+                            minimumFractionDigits: 2,
+                          })}
+                        </td>
+                      </tr>
+                    </>
+                  );
+                })()}
               </tfoot>
             </table>
           </div>
