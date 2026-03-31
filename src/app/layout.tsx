@@ -38,6 +38,25 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
+        {/* SEO Meta Tags */}
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="robots" content="index, follow" />
+        <meta name="author" content="InVoices Team" />
+        <meta name="keywords" content="invoicing, developer, freelancer, invoice generator, SaaS, billing, payments, clients, business, finance" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="InVoices — Developer Invoicing Platform" />
+        <meta property="og:description" content="Simple, beautiful invoicing for developers and freelancers." />
+        <meta property="og:image" content="/og-image.png" />
+        <meta property="og:url" content="https://invoices.dev/" />
+        <meta property="og:site_name" content="InVoices" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="InVoices — Developer Invoicing Platform" />
+        <meta name="twitter:description" content="Simple, beautiful invoicing for developers and freelancers." />
+        <meta name="twitter:image" content="/og-image.png" />
+        <meta name="twitter:site" content="@invoicesapp" />
+        <link rel="canonical" href="https://invoices.dev/" />
+        <link rel="icon" href="/favicon.ico" />
+        {/* Theme/Locale Script */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
