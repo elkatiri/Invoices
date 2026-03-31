@@ -32,9 +32,7 @@ const statusOptions = [
 const currencyOptions = [
   { value: 'USD', label: 'USD ($)' },
   { value: 'EUR', label: 'EUR (€)' },
-  { value: 'GBP', label: 'GBP (£)' },
-  { value: 'CAD', label: 'CAD (C$)' },
-  { value: 'AUD', label: 'AUD (A$)' },
+  { value: 'DH', label: 'Dirham (DH)' },
 ];
 
 export default function InvoiceFormClient({
@@ -454,12 +452,12 @@ export default function InvoiceFormClient({
                       }
                     />
                   </div>
-                  <div className="sm:col-span-1 flex items-center justify-end h-[38px]">
+                  <div className="sm:col-span-1 flex items-center justify-end h-9.5">
                     <span className="text-sm font-medium text-dark-800 dark:text-light-50">
                       ${lineTotal.toFixed(2)}
                     </span>
                   </div>
-                  <div className="sm:col-span-1 flex items-center justify-end h-[38px]">
+                  <div className="sm:col-span-1 flex items-center justify-end h-9.5">
                     {items.length > 1 && (
                       <button
                         type="button"

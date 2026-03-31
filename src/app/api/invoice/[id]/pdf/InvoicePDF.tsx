@@ -143,7 +143,9 @@ const styles = StyleSheet.create({
 });
 
 const currencySymbol: Record<string, string> = {
-  USD: '$', EUR: '€', GBP: '£', CAD: 'C$', AUD: 'A$',
+  USD: '$',
+  EUR: '€',
+  DH: 'د.م.',
 };
 
 export default function InvoicePDF({
